@@ -166,4 +166,9 @@ public class GameManager : MonoBehaviour
         deathScreen.SetActive(false);
         conn.Reducers.Respawn();
     }
+
+    public void Update()
+    {
+        Debug.Log("FPS: " + (1.0f / Time.deltaTime));
+    }
 }

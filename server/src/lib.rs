@@ -1,5 +1,6 @@
 use rand::Rng;
 use spacetimedb::{spacetimedb_lib::ScheduleAt, Identity, ReducerContext, SpacetimeType, Table, Timestamp};
+use spacetimedb::log;
 use std::time::Duration;
 
 // TODO:
@@ -10,8 +11,9 @@ use std::time::Duration;
 // - [ ] Ejecting mass
 // - [ ] Leaderboard
 
-const TARGET_FOOD_COUNT: usize = 600;
+const TARGET_FOOD_COUNT: usize = 400;
 const MINIMUM_SAFE_MASS_RATIO: f32 = 0.85;
+const EATING_ENABLED: bool = true;
 
 #[spacetimedb::table(name = config, public)]
 pub struct Config {
@@ -83,9 +85,6 @@ pub struct Vector2 {
 #[spacetimedb::table(name = move_all_players_timer, scheduled(move_all_players))]
 pub struct MoveAllPlayersTimer {}
 
-#[spacetimedb::table(name = spawn_food_timer, scheduled(spawn_food))]
-pub struct SpawnFoodTimer {}
-
 #[spacetimedb::table(name = circle_decay_timer, scheduled(circle_decay))]
 pub struct CircleDecayTimer {}
 
@@ -102,9 +101,9 @@ impl Vector2 {
 }
 
 const START_PLAYER_MASS: u32 = 12;
-const START_PLAYER_SPEED: u32 = 10;
+const START_PLAYER_SPEED: u32 = 5;
 const FOOD_MASS_MIN: u32 = 2;
-const FOOD_MASS_MAX: u32 = 4;
+const FOOD_MASS_MAX: u32 = 3;
 
 #[spacetimedb::reducer(init)]
 pub fn init(ctx: &ReducerContext) -> Result<(), String> {
@@ -114,10 +113,7 @@ pub fn init(ctx: &ReducerContext) -> Result<(), String> {
         scheduled_id: 0,
         scheduled_at: ScheduleAt::Interval(Duration::from_secs(5).as_micros() as u64),
     })?;
-    ctx.db.spawn_food_timer().try_insert(SpawnFoodTimer {
-        scheduled_id: 0,
-        scheduled_at: ScheduleAt::Interval(Duration::from_millis(500).as_micros() as u64),
-    })?;
+    spawn_food(ctx)?;
     ctx.db.move_all_players_timer().try_insert(MoveAllPlayersTimer {
         scheduled_id: 0,
         scheduled_at: ScheduleAt::Interval(Duration::from_millis(50).as_micros() as u64),
@@ -236,7 +232,7 @@ fn mass_to_radius(mass: u32) -> f32 {
 }
 
 fn mass_to_max_move_speed(mass: u32) -> f32 {
-    2.0 * START_PLAYER_SPEED as f32 / (1.0 + (mass as f32 / START_PLAYER_MASS as f32).sqrt())
+    START_PLAYER_SPEED as f32
 }
 
 #[spacetimedb::reducer]
@@ -272,10 +268,13 @@ pub fn move_all_players(ctx: &ReducerContext, _timer: MoveAllPlayersTimer) -> Re
                 if let Some(other_circle) = other_circle {
                     if other_circle.player_id != circle.player_id {
                         let mass_ratio = entity.mass as f32 / circle_entity.mass as f32;
-                        if mass_ratio < MINIMUM_SAFE_MASS_RATIO {
-                            ctx.db.entity().id().delete(&entity.id);
-                            ctx.db.circle().entity_id().delete(&entity.id);
-                            circle_entity.mass += entity.mass;
+                        log::info!("collision!");
+                        if EATING_ENABLED {
+                            if mass_ratio < MINIMUM_SAFE_MASS_RATIO {
+                                ctx.db.entity().id().delete(&entity.id);
+                                ctx.db.circle().entity_id().delete(&entity.id);
+                                circle_entity.mass += entity.mass;
+                            }
                         }
                     }
                 }
@@ -313,12 +312,12 @@ pub fn player_split(ctx: &ReducerContext) -> Result<(), String> {
 }
 
 #[spacetimedb::reducer]
-pub fn spawn_food(ctx: &ReducerContext, _timer: SpawnFoodTimer) -> Result<(), String> {
+pub fn spawn_food(ctx: &ReducerContext) -> Result<(), String> {
     // Is there too much food already? Are there no players yet?
     let mut food_count = ctx.db.food().count();
     let player_count = ctx.db.player().count();
 
-    while food_count < TARGET_FOOD_COUNT as u64 && player_count > 0 {
+    while food_count < TARGET_FOOD_COUNT as u64 {
         let mut rng = ctx.rng();
         let food_mass = rng.gen_range(FOOD_MASS_MIN..FOOD_MASS_MAX);
         let world_size = ctx.db.config().id().find(0).ok_or("Config not found")?.world_size;
