@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+<!-- TODO: reinstate the following once we release rc4.
+     For now, this project assumes it is building against a local copy of SpacetimeDB at ../../../SpacetimeDB
+     on branch jsdt/subscribe-sdk-3 -->
 <!--
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
