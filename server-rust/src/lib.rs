@@ -463,7 +463,6 @@ pub fn move_all_players(ctx: &ReducerContext, _timer: MoveAllPlayersTimer) -> Re
 }
 
 fn schedule_consume_entity(ctx: &ReducerContext, consumer_id: u32, consumed_id: u32) {
-    log::info!("now: {}", Timestamp::now().into_micros_since_epoch());
     ctx.db.consume_entity_timer().insert(ConsumeEntityTimer {
         scheduled_id: 0,
         scheduled_at: ScheduleAt::Time(Timestamp::now().into_micros_since_epoch()),

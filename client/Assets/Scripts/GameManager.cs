@@ -104,14 +104,9 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Subscription applied!");
         OnSubscriptionApplied?.Invoke();
-        Debug.Log($"Conn: {Conn} Conn.Db: {Conn.Db}");
 
         // Once we have the initial subscription sync'd to the client cache
         // Get the world size from the config table and set up the arena
-        foreach (var config in Conn.Db.Config.Iter())
-        {
-            Debug.Log($"got config {config.Id} size {config.WorldSize} ");
-        }
         var worldSize = Conn.Db.Config.Id.Find(0).WorldSize;
         SetupArena(worldSize);
     }
