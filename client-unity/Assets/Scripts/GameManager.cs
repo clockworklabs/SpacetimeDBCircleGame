@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void HandleSubscriptionApplied(EventContext ctx)
+    private void HandleSubscriptionApplied(SubscriptionEventContext ctx)
     {
         Debug.Log("Subscription applied!");
         OnSubscriptionApplied?.Invoke();
