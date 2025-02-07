@@ -1,10 +1,11 @@
 {
   "dependencies": {
     "com.clockworklabs.spacetimedbsdk": {
-      "version": "file:F:/clockwork/com.clockworklabs.spacetimedbsdk",
+      "version": "git@github.com:clockworklabs/com.clockworklabs.spacetimedbsdk.git#jgilles/timestamp-special-type",
       "depth": 0,
-      "source": "local",
-      "dependencies": {}
+      "source": "git",
+      "dependencies": {},
+      "hash": "812e7c3e014005d31a5af41097b9c64a04c8c7df"
     },
     "com.unity.2d.animation": {
       "version": "9.1.1",
