@@ -72,6 +72,13 @@ namespace SpacetimeDB.Types
     {
         private readonly DbConnection conn;
         public readonly Exception Event;
+        Exception IErrorContext.Event
+        {
+            get
+            {
+                return Event;
+            }
+        }
 
         public RemoteTables Db => conn.Db;
         public RemoteReducers Reducers => conn.Reducers;
