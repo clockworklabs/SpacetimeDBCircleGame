@@ -56,12 +56,6 @@ public class GameManager : MonoBehaviour
         // Building the connection will establish a connection to the SpacetimeDB
         // server.
         Conn = builder.Build();
-
-        /* BEGIN: not in tutorial */
-#pragma warning disable CS0612 // Type or member is obsolete
-        Conn.onUnhandledReducerError += InstanceOnUnhandledReducerError;
-#pragma warning restore CS0612 // Type or member is obsolete
-        /* END: not in tutorial */
     }
 
     // Called when we connect to SpacetimeDB and receive our client identity

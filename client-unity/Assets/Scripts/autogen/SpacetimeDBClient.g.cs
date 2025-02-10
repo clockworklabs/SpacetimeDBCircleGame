@@ -109,8 +109,6 @@ namespace SpacetimeDB.Types
     public abstract partial class Reducer
     {
         private Reducer() { }
-
-        public sealed class StdbNone : Reducer { }
     }
 
     public sealed class DbConnection : DbConnectionBase<DbConnection, RemoteTables, Reducer>
@@ -142,7 +140,6 @@ namespace SpacetimeDB.Types
                 "spawn_food" => BSATNHelpers.Decode<Reducer.SpawnFood>(encodedArgs),
                 "suicide" => BSATNHelpers.Decode<Reducer.Suicide>(encodedArgs),
                 "update_player_input" => BSATNHelpers.Decode<Reducer.UpdatePlayerInput>(encodedArgs),
-                "<none>" or "" => new Reducer.StdbNone(),
                 var reducer => throw new ArgumentOutOfRangeException("Reducer", $"Unknown reducer {reducer}")
             };
         }
@@ -176,7 +173,6 @@ namespace SpacetimeDB.Types
                 Reducer.SpawnFood args => Reducers.InvokeSpawnFood(eventContext, args),
                 Reducer.Suicide args => Reducers.InvokeSuicide(eventContext, args),
                 Reducer.UpdatePlayerInput args => Reducers.InvokeUpdatePlayerInput(eventContext, args),
-                Reducer.StdbNone => true,
                 _ => throw new ArgumentOutOfRangeException("Reducer", $"Unknown reducer {reducer}")
             };
         }
