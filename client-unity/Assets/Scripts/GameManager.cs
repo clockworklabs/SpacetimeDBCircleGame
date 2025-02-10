@@ -48,7 +48,7 @@ public class GameManager : MonoBehaviour
         // Then, you can run the executable multiple times. Since the executable will not check for
         // a saved auth token, each run of will receive a different Identifier,
         // and their circles will be able to eat each other.
-        if (PlayerPrefs.HasKey(AuthToken.GetTokenKey()))
+        if (AuthToken.Token != "")
         {
             builder = builder.WithToken(AuthToken.Token);
         }
